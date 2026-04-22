@@ -19,6 +19,7 @@ type Product = {
   price_jpy: number;
   stock: number;
   image_url: string | null;
+  product_image: string | null; // Your new column
   category: string | null;
   is_active: boolean;
   view_count: number;
@@ -30,6 +31,7 @@ const empty = {
   price_jpy: 0,
   stock: 0,
   image_url: "",
+  product_image: "",
   category: "",
   is_active: true,
 };
@@ -72,6 +74,7 @@ export default function AdminProducts() {
       price_jpy: p.price_jpy,
       stock: p.stock,
       image_url: p.image_url ?? "",
+      product_image: p.product_image ?? "",
       category: p.category ?? "",
       is_active: p.is_active,
     });
@@ -87,36 +90,36 @@ export default function AdminProducts() {
     }
 
     setIsUploading(true);
-    let finalImageUrl = form.image_url;
+    let finalCloudUrl = form.product_image;
 
     try {
-      // 1. If a file is selected, upload it to Supabase Storage first
+      // 1. Handle File Upload if a new file was selected
       if (file) {
         const fileExt = file.name.split('.').pop();
         const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
         const filePath = fileName;
 
         const { error: uploadError } = await supabase.storage
-          .from('product_images') // <--- MUST MATCH YOUR SUPABASE BUCKET NAME
+          .from('product_images') // Bucket name must be exactly this in Supabase
           .upload(filePath, file);
 
         if (uploadError) throw uploadError;
 
-        // 2. Get the public URL for the database
         const { data: { publicUrl } } = supabase.storage
           .from('product_images')
           .getPublicUrl(filePath);
 
-        finalImageUrl = publicUrl;
+        finalCloudUrl = publicUrl;
       }
 
-      // 3. Prepare payload for the database table
+      // 2. Prepare payload for your table
       const payload = {
         name: form.name.trim(),
         description: form.description.trim() || null,
         price_jpy: Math.max(0, Math.floor(Number(form.price_jpy) || 0)),
         stock: Math.max(0, Math.floor(Number(form.stock) || 0)),
-        image_url: finalImageUrl || null,
+        image_url: form.image_url.trim() || null, // Keep old field for compatibility
+        product_image: finalCloudUrl || null,    // Save link to your NEW column
         category: form.category.trim() || null,
         is_active: form.is_active,
       };
@@ -151,7 +154,7 @@ export default function AdminProducts() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="font-serif text-3xl md:text-4xl">Inventory</h1>
-          <p className="text-muted-foreground mt-1">Add masks, edit prices, and update stock.</p>
+          <p className="text-muted-foreground mt-1">Manage your Sri Lankan masks.</p>
         </div>
         <Button onClick={openNew}><Plus className="h-4 w-4 mr-2" /> Add mask</Button>
       </div>
@@ -165,7 +168,6 @@ export default function AdminProducts() {
                 <th className="p-3 font-medium">Category</th>
                 <th className="p-3 font-medium">Price (JPY)</th>
                 <th className="p-3 font-medium">Stock</th>
-                <th className="p-3 font-medium">Views</th>
                 <th className="p-3 font-medium">Status</th>
                 <th className="p-3 font-medium"></th>
               </tr>
@@ -175,16 +177,18 @@ export default function AdminProducts() {
                 <tr key={p.id} className="border-t border-border">
                   <td className="p-3">
                     <div className="flex items-center gap-3">
-                      <img src={resolveImage(p.image_url)} alt="" className="h-12 w-12 rounded object-cover" />
+                      {/* Displays cloud image if available, else falls back to resolveImage logic */}
+                      <img 
+                        src={p.product_image || resolveImage(p.image_url)} 
+                        alt="" 
+                        className="h-12 w-12 rounded object-cover" 
+                      />
                       <span className="font-medium">{p.name}</span>
                     </div>
                   </td>
                   <td className="p-3 text-muted-foreground">{p.category ?? "—"}</td>
                   <td className="p-3 font-semibold">{formatJPY(p.price_jpy)}</td>
-                  <td className="p-3">
-                    <span className={p.stock <= 3 ? "text-destructive font-medium" : ""}>{p.stock}</span>
-                  </td>
-                  <td className="p-3 text-muted-foreground">{p.view_count}</td>
+                  <td className="p-3">{p.stock}</td>
                   <td className="p-3">
                     <Badge variant={p.is_active ? "default" : "secondary"}>{p.is_active ? "Active" : "Hidden"}</Badge>
                   </td>
@@ -194,9 +198,6 @@ export default function AdminProducts() {
                   </td>
                 </tr>
               ))}
-              {products.length === 0 && (
-                <tr><td colSpan={7} className="p-10 text-center text-muted-foreground">No products yet.</td></tr>
-              )}
             </tbody>
           </table>
         </div>
@@ -212,55 +213,50 @@ export default function AdminProducts() {
               <Label htmlFor="name">Name</Label>
               <Input id="name" required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
             </div>
-            <div>
-              <Label htmlFor="desc">Description</Label>
-              <Textarea id="desc" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
-            </div>
+            
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="price">Price (JPY)</Label>
-                <Input id="price" type="number" min={0} value={form.price_jpy}
+                <Input id="price" type="number" value={form.price_jpy}
                   onChange={(e) => setForm({ ...form, price_jpy: Number(e.target.value) })} />
               </div>
               <div>
                 <Label htmlFor="stock">Stock</Label>
-                <Input id="stock" type="number" min={0} value={form.stock}
+                <Input id="stock" type="number" value={form.stock}
                   onChange={(e) => setForm({ ...form, stock: Number(e.target.value) })} />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="cat">Category</Label>
-                <Input id="cat" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} placeholder="Raksha / Sanni / Kolam" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="img-file">Upload Image</Label>
-                <div className="flex items-center gap-2">
-                  <Input 
-                    id="img-file" 
-                    type="file" 
-                    accept="image/*" 
-                    onChange={(e) => setFile(e.target.files?.[0] || null)}
-                    className="cursor-pointer"
-                  />
-                </div>
-              </div>
-            </div>
-            
+
             <div>
-              <Label htmlFor="img">Current Image URL (Auto-updates on upload)</Label>
-              <Input id="img" value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} placeholder="https://..." />
+              <Label>Product Image Upload</Label>
+              <div className="mt-1 flex items-center gap-4">
+                <Input 
+                  type="file" 
+                  accept="image/*" 
+                  onChange={(e) => setFile(e.target.files?.[0] || null)}
+                  className="cursor-pointer"
+                />
+              </div>
+              {form.product_image && !file && (
+                <p className="text-xs text-green-600 mt-1">✓ Cloud image already set</p>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="desc">Description</Label>
+              <Textarea id="desc" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
             </div>
 
             <div className="flex items-center gap-2">
               <input id="active" type="checkbox" checked={form.is_active}
-                onChange={(e) => setForm({ ...form, is_active: e.target.checked })} className="h-4 w-4 rounded border-gray-300" />
+                onChange={(e) => setForm({ ...form, is_active: e.target.checked })} />
               <Label htmlFor="active">Visible on storefront</Label>
             </div>
-            <DialogFooter className="pt-4">
+
+            <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
               <Button type="submit" disabled={isUploading}>
-                {isUploading ? "Uploading..." : editing ? "Save changes" : "Add mask"}
+                {isUploading ? "Uploading..." : "Save Product"}
               </Button>
             </DialogFooter>
           </form>
