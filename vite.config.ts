@@ -5,7 +5,7 @@ import { componentTagger } from "lovable-tagger";
 
 export default defineConfig(({ mode }) => ({
   // Add this line below. Replace 'vite_react_shadcn_ts' with your actual repo name.
-  base: "/vite_react_shadcn_ts/", 
+  base: "/lakeyaka/", 
 
   server: {
     host: "::",
