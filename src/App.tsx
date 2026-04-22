@@ -19,31 +19,19 @@ import AdminProducts from "./pages/admin/AdminProducts.tsx";
 import AdminAnalytics from "./pages/admin/AdminAnalytics.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
-const queryClient = new QueryClient();
+// ... keep imports as they are
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      {/* UPDATE THIS LINE BELOW */}
+      <BrowserRouter basename="/lakeyaka">
         <CartProvider>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/shop" element={<Shop />} />
-            <Route path="/product/:id" element={<ProductDetail />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/order-confirmed/:orderNumber" element={<OrderConfirmed />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<AdminDashboard />} />
-              <Route path="orders" element={<AdminOrders />} />
-              <Route path="products" element={<AdminProducts />} />
-              <Route path="analytics" element={<AdminAnalytics />} />
-            </Route>
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            {/* ... keep all other routes exactly the same */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </CartProvider>
