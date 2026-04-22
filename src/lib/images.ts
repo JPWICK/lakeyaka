@@ -12,7 +12,6 @@ const map: Record<string, string> = {
   "mask-sanni": maskSanni,
   "mask-kolam": maskKolam,
   "hero-mask": heroMask,
-  "gini-mask": giniMask,
 };
 
 export function resolveImage(slug?: string | null): string {
