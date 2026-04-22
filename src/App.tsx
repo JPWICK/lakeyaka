@@ -32,14 +32,14 @@ const App = () => (
         <CartProvider>
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/shop" element={<Shop />} />
+            <Route path="shop" element={<Shop />} />
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/order-confirmed/:orderNumber" element={<OrderConfirmed />} />
             <Route path="/about" element={<About />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/admin" element={<AdminLayout />}>
+            <Route path="auth" element={<Auth />} />
+            <Route path="admin" element={<AdminLayout />}>
   <Route index element={<AdminDashboard />} /> {/* This is /lakeyaka/admin */}
   <Route path="orders" element={<AdminOrders />} /> {/* This is /lakeyaka/admin/orders */}
   <Route path="products" element={<AdminProducts />} />
