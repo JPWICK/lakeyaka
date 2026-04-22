@@ -4,6 +4,7 @@ import maskMaru from "@/assets/mask-maru.jpg";
 import maskSanni from "@/assets/mask-sanni.jpg";
 import maskKolam from "@/assets/mask-kolam.jpg";
 import heroMask from "@/assets/hero-mask.jpg";
+import giniMask from "@/assets/gini-mask.jpg";
 
 const map: Record<string, string> = {
   "mask-naga": maskNaga,
