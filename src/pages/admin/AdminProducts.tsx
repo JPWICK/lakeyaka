@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 
 type Product = {
@@ -39,6 +39,10 @@ export default function AdminProducts() {
   const [editing, setEditing] = useState<Product | null>(null);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ ...empty });
+  
+  // States for handling the image file upload
+  const [file, setFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     document.title = "Inventory — Admin";
@@ -46,13 +50,17 @@ export default function AdminProducts() {
   }, []);
 
   async function load() {
-    const { data } = await supabase.from("products").select("*").order("created_at", { ascending: false });
+    const { data } = await supabase
+      .from("products")
+      .select("*")
+      .order("created_at", { ascending: false });
     setProducts(data ?? []);
   }
 
   function openNew() {
     setEditing(null);
     setForm({ ...empty });
+    setFile(null);
     setOpen(true);
   }
 
@@ -67,6 +75,7 @@ export default function AdminProducts() {
       category: p.category ?? "",
       is_active: p.is_active,
     });
+    setFile(null);
     setOpen(true);
   }
 
@@ -76,25 +85,57 @@ export default function AdminProducts() {
       toast.error("Name is required");
       return;
     }
-    const payload = {
-      name: form.name.trim(),
-      description: form.description.trim() || null,
-      price_jpy: Math.max(0, Math.floor(Number(form.price_jpy) || 0)),
-      stock: Math.max(0, Math.floor(Number(form.stock) || 0)),
-      image_url: form.image_url.trim() || null,
-      category: form.category.trim() || null,
-      is_active: form.is_active,
-    };
 
-    const { error } = editing
-      ? await supabase.from("products").update(payload).eq("id", editing.id)
-      : await supabase.from("products").insert(payload);
+    setIsUploading(true);
+    let finalImageUrl = form.image_url;
 
-    if (error) toast.error(error.message);
-    else {
+    try {
+      // 1. If a file is selected, upload it to Supabase Storage first
+      if (file) {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const filePath = fileName;
+
+        const { error: uploadError } = await supabase.storage
+          .from('product_images') // <--- MUST MATCH YOUR SUPABASE BUCKET NAME
+          .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        // 2. Get the public URL for the database
+        const { data: { publicUrl } } = supabase.storage
+          .from('product_images')
+          .getPublicUrl(filePath);
+
+        finalImageUrl = publicUrl;
+      }
+
+      // 3. Prepare payload for the database table
+      const payload = {
+        name: form.name.trim(),
+        description: form.description.trim() || null,
+        price_jpy: Math.max(0, Math.floor(Number(form.price_jpy) || 0)),
+        stock: Math.max(0, Math.floor(Number(form.stock) || 0)),
+        image_url: finalImageUrl || null,
+        category: form.category.trim() || null,
+        is_active: form.is_active,
+      };
+
+      const { error } = editing
+        ? await supabase.from("products").update(payload).eq("id", editing.id)
+        : await supabase.from("products").insert(payload);
+
+      if (error) throw error;
+
       toast.success(editing ? "Product updated" : "Product added");
       setOpen(false);
+      setFile(null);
       load();
+    } catch (error: any) {
+      console.error("Save Error:", error);
+      toast.error(error.message || "Failed to save product");
+    } finally {
+      setIsUploading(false);
     }
   }
 
@@ -192,19 +233,35 @@ export default function AdminProducts() {
                 <Label htmlFor="cat">Category</Label>
                 <Input id="cat" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} placeholder="Raksha / Sanni / Kolam" />
               </div>
-              <div>
-                <Label htmlFor="img">Image (slug or URL)</Label>
-                <Input id="img" value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} placeholder="mask-naga or https://..." />
+              <div className="space-y-2">
+                <Label htmlFor="img-file">Upload Image</Label>
+                <div className="flex items-center gap-2">
+                  <Input 
+                    id="img-file" 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={(e) => setFile(e.target.files?.[0] || null)}
+                    className="cursor-pointer"
+                  />
+                </div>
               </div>
             </div>
+            
+            <div>
+              <Label htmlFor="img">Current Image URL (Auto-updates on upload)</Label>
+              <Input id="img" value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} placeholder="https://..." />
+            </div>
+
             <div className="flex items-center gap-2">
               <input id="active" type="checkbox" checked={form.is_active}
-                onChange={(e) => setForm({ ...form, is_active: e.target.checked })} />
+                onChange={(e) => setForm({ ...form, is_active: e.target.checked })} className="h-4 w-4 rounded border-gray-300" />
               <Label htmlFor="active">Visible on storefront</Label>
             </div>
-            <DialogFooter>
+            <DialogFooter className="pt-4">
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-              <Button type="submit">{editing ? "Save changes" : "Add mask"}</Button>
+              <Button type="submit" disabled={isUploading}>
+                {isUploading ? "Uploading..." : editing ? "Save changes" : "Add mask"}
+              </Button>
             </DialogFooter>
           </form>
         </DialogContent>
