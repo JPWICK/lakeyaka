@@ -31,7 +31,7 @@ export default function Auth() {
       const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: { emailRedirectTo: `${window.location.origin}/admin` },
+        options: { emailRedirectTo: `${window.location.origin}/lakeyaka/admin` },
       });
       if (error) toast.error(error.message);
       else toast.success("Account created — you can sign in now.");
