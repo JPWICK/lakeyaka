@@ -56,13 +56,18 @@ export default function Checkout() {
       return;
     }
     setSubmitting(true);
+    const d = parsed.data;
     const { data: order, error } = await supabase
       .from("orders")
       .insert({
-        ...parsed.data,
-        customer_phone: parsed.data.customer_phone || null,
-        shipping_postal: parsed.data.shipping_postal || null,
-        notes: parsed.data.notes || null,
+        customer_name: d.customer_name,
+        customer_email: d.customer_email,
+        customer_phone: d.customer_phone || null,
+        shipping_address: d.shipping_address,
+        shipping_city: d.shipping_city,
+        shipping_country: d.shipping_country,
+        shipping_postal: d.shipping_postal || null,
+        notes: d.notes || null,
         total_jpy: total,
         status: "pending",
       })
