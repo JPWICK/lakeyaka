@@ -9,7 +9,19 @@
     <title>LakeYaka</title>
     <meta name="description" content="Hand-carved Sri Lankan Raksha, Sanni and Kolam masks. Authentic ceremonial art from Ambalangoda artisans, shipped worldwide. Prices in JPY.">
     <meta name="author" content="Raksha & Co." />
-    
+
+    <script type="text/javascript">
+  (function(l) {
+    if (l.search[1] === '/' ) {
+      var decoded = l.search.slice(1).split('&').map(function(s) { 
+        return s.replace(/~and~/g, '&') 
+      }).join('?');
+      window.history.replaceState(null, null,
+          l.pathname.slice(0, -1) + decoded + l.hash
+      );
+    }
+  }(window.location))
+</script>
     
     <meta property="og:type" content="website" />
     <meta property="og:image" content="https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/7eb27617-9c37-491f-a4c9-714d86b3cbbb/id-preview-42b9e4bf--2002c374-ca92-405c-8351-49022ced5478.lovable.app-1776820750745.png">
