@@ -3,10 +3,9 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
-// https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  // IMPORTANT: Add this line. Use your GitHub repo name, e.g., "/sri-lankan-masks/"
-  base: "/lakeyaka/", 
+  // Add this line below. Replace 'vite_react_shadcn_ts' with your actual repo name.
+  base: "/vite_react_shadcn_ts/", 
 
   server: {
     host: "::",
@@ -29,7 +28,7 @@ export default defineConfig(({ mode }) => ({
       "react/jsx-runtime",
       "react/jsx-dev-runtime",
       "@tanstack/react-query",
-      "@tanstack/query-core",
+      "@tanstack/query-core"
     ],
   },
 }));
