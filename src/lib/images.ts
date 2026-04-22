@@ -1,5 +1,5 @@
 import maskNaga from "@/assets/mask-naga.jpg";
-import maskGurulu from "@/assets/mask-gurulu.jpg";
+import maskGurulu from "@/assets/mask-gurulu2.jpg";
 import maskMaru from "@/assets/mask-maru.jpg";
 import maskSanni from "@/assets/mask-sanni.jpg";
 import maskKolam from "@/assets/mask-kolam.jpg";
