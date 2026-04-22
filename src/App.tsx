@@ -40,11 +40,11 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<AdminDashboard />} />
-              <Route path="orders" element={<AdminOrders />} />
-              <Route path="products" element={<AdminProducts />} />
-              <Route path="analytics" element={<AdminAnalytics />} />
-            </Route>
+  <Route index element={<AdminDashboard />} /> {/* This is /lakeyaka/admin */}
+  <Route path="orders" element={<AdminOrders />} /> {/* This is /lakeyaka/admin/orders */}
+  <Route path="products" element={<AdminProducts />} />
+  <Route path="analytics" element={<AdminAnalytics />} />
+</Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
         </CartProvider>
