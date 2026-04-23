@@ -22,4 +22,4 @@ export function resolveImage(slug?: string | null): string {
   return map[slug] ?? heroMask;
 }
 
-export const giniImage = giniMask;
+export const heroImage = heroMask;
