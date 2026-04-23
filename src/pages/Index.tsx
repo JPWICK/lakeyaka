@@ -33,7 +33,7 @@ const Index = () => {
       {/* Hero */}
       <section className="relative overflow-hidden bg-hero text-primary-foreground">
         <div className="absolute inset-0 opacity-20 mix-blend-overlay">
-          <img src={heroImage} alt="" className="h-full w-full object-cover" width={1600} height={1200} />
+          <img src={giniImage} alt="" className="h-full w-full object-cover" width={1600} height={1200} />
         </div>
         <div className="relative container py-20 md:py-32 grid md:grid-cols-2 gap-10 items-center">
           <div className="animate-fade-in">
