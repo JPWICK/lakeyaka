@@ -4,7 +4,7 @@ import { ArrowRight, Sparkles, Hammer, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StoreLayout } from "@/components/StoreLayout";
 import { supabase } from "@/integrations/supabase/client";
-import { resolveImage, heroImage } from "@/lib/images";
+import { resolveImage, giniImage } from "@/lib/images";
 import { formatJPY } from "@/lib/format";
 
 type Product = {
@@ -60,7 +60,7 @@ const Index = () => {
           </div>
           <div className="relative hidden md:block animate-scale-in">
             <div className="absolute inset-0 bg-gold rounded-full blur-3xl opacity-30" />
-            <img src={heroImage} alt="Royal Raksha mask centerpiece" className="relative rounded-lg shadow-elegant" width={800} height={600} />
+            <img src={giniImage} alt="Royal Raksha mask centerpiece" className="relative rounded-lg shadow-elegant" width={800} height={600} />
           </div>
         </div>
       </section>
